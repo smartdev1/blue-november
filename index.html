@@ -147,14 +147,13 @@ function App(){
     setMsg("");
     cvRef.current.toBlob(function(blob){
       var fname = "novembre-bleu-" + ((name || "engagement").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "engagement") + ".png";
-      var done = function(dl){
-        if (!dl){ setMsg("Téléchargement indisponible ici : faites un clic droit (ou appui long) sur l’image pour l’enregistrer."); return; }
-        dl.save({ filename: fname, data: blob }).then(function(){ setMsg("Image enregistrée ✔"); }, function(err){
-          if (err && err.code === "declined") return;
-          setMsg("Téléchargement impossible : faites un clic droit (ou appui long) sur l’image pour l’enregistrer.");
-        });
-      };
-      try { window.claude.use("downloads").then(done, function(){ done(null); }); } catch(e){ done(null); }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = fname;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      setMsg("Image enregistrée ✔");
     }, "image/png");
   }
   function reset(){ setPhoto(null); setSt({ zoom: 1, ox: 0, oy: 0 }); setName(""); setMsg(""); if (fileRef.current) fileRef.current.value = ""; }
